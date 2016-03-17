@@ -33,16 +33,13 @@ WebGLAttribute.prototype = {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buff);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(value), gl.STATIC_DRAW);
         
-        gl.vertexAttribPointer(this.position, this.components, gl[this.type.toUpperCase()], false, 0, 0);
-        
         this.position = gl.getAttribLocation(program, this.name);
+        gl.enableVertexAttribArray(this.position);
     },
     
     update: function(gl, program){
-        //gl.bindBuffer(gl.ARRAY_BUFFER, this.buff);
-        //gl.vertexAttribPointer(this.position, 3, gl[this.type.toUpperCase()], false, 0, 0);
-        //gl.vertexAttribPointer(this.position, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(this.position);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buff);
+        gl.vertexAttribPointer(this.position, this.components, gl[this.type.toUpperCase()], false, 0, 0);
     }
 };
 
@@ -94,10 +91,8 @@ WebGL.prototype = {
         }
     },
     update: function(){
-        this.updateUniforms();
-        
-        
         this.updateAttributes();
+        this.updateUniforms();
         
         var gl = this.gl;
         
@@ -105,23 +100,23 @@ WebGL.prototype = {
         var coord = gl.getAttribLocation(this.program, "coordinates");
         gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0); 
         gl.enableVertexAttribArray(coord);
-        
-        
-        //this.updateVaryings();
     },
     draw: function(){
         var gl = this.gl;
         
-        gl.clearColor(0.5, 0.5, 0.5, 1.0);
-        gl.enable(gl.DEPTH_TEST); 
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
         
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        
+        gl.clearColor(0.5, 0.5, 0.5, 1.0);
+        
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.enable(gl.DEPTH_TEST); 
         
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
         
-        gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, this.indices.length / 2, gl.UNSIGNED_SHORT, 0);
     },
     
     addShader: function(type, code){

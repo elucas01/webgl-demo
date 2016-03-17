@@ -15,5 +15,5 @@ varying vec3 lighting;
 void main(void){
     gl_Position = coordinates * transform;
     
-    lighting = vec3(0.5 + abs(dot(normal, vec3(-0.57735))));
+    lighting = vec3(dot(normal, vec3(-0.57735)));
 }

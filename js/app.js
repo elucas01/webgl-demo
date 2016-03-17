@@ -2,6 +2,8 @@
 /* global Matrix3, Matrix4 */
 /* global vec3 */
 
+/* global makePerspective */
+
 /* global load */
 
 
@@ -39,12 +41,14 @@ function calcNormals(gfx){
                          gfx.vertices[indexC + 2]);
                          
         var norm = normal(a, b, c).normalize();
+        //norm = new vec3(0.5-Math.random(), 0.5-Math.random(), 0.5-Math.random()).normalize();
         
         normalArr[i+0] = norm.x;
         normalArr[i+1] = norm.y;
         normalArr[i+2] = norm.z;
     }
     
+    console.log(normalArr);
     normals.setValue(gfx.gl, gfx.program, normalArr);
 }
 
@@ -59,14 +63,50 @@ function init(vertex, fragment){
     
     gfx.link();
     
-    gfx.setVertices([+.5, +.5, +.5,
-                     -.5, +.5, -.5,
-                     -.5, -.5, +.5,
-                     +.5, -.5, -.5]);
-    gfx.setIndices([0, 1, 2,
-                    0, 1, 3,
-                    0, 2, 3,
-                    1, 2, 3]);
+    gfx.setVertices([
+        // Front face
+        -1.0, -1.0,  1.0,
+         1.0, -1.0,  1.0,
+         1.0,  1.0,  1.0,
+        -1.0,  1.0,  1.0,
+    
+        // Back face
+        -1.0, -1.0, -1.0,
+        -1.0,  1.0, -1.0,
+         1.0,  1.0, -1.0,
+         1.0, -1.0, -1.0,
+    
+        // Top face
+        -1.0,  1.0, -1.0,
+        -1.0,  1.0,  1.0,
+         1.0,  1.0,  1.0,
+         1.0,  1.0, -1.0,
+    
+        // Bottom face
+        -1.0, -1.0, -1.0,
+         1.0, -1.0, -1.0,
+         1.0, -1.0,  1.0,
+        -1.0, -1.0,  1.0,
+    
+        // Right face
+         1.0, -1.0, -1.0,
+         1.0,  1.0, -1.0,
+         1.0,  1.0,  1.0,
+         1.0, -1.0,  1.0,
+    
+        // Left face
+        -1.0, -1.0, -1.0,
+        -1.0, -1.0,  1.0,
+        -1.0,  1.0,  1.0,
+        -1.0,  1.0, -1.0]);
+    gfx.setIndices([
+        0,  1,  2,      0,  2,  3,    // front
+        4,  5,  6,      4,  6,  7,    // back
+        8,  9,  10,     8,  10, 11,   // top
+        12, 13, 14,     12, 14, 15,   // bottom
+        16, 17, 18,     16, 18, 19,   // right
+        20, 21, 22,     20, 22, 23    // left
+    ]);
                     
     gfx.uniforms.push(transform);
     gfx.attributes.push(normals);
@@ -76,10 +116,12 @@ function init(vertex, fragment){
 }
 
 function loop(){
-    var mat = new Matrix4([ 1, 0, 0, 0,
+    /*var mat = new Matrix4([ 1, 0, 0, 0,
                             0, 1, 0, 0,
-                            0, 0, 1, .3,
-                            0, 0, 0, 1]);
+                            0, 0, 1, 0,
+                            0, 0, -1, 0]);*/
+    var mat = makePerspective(45, canvas.height/canvas.width, 0.4, 14.0);
+    mat = Matrix4.mul(mat, Matrix4.translation(0, 0, -10.0));
                             
     var secs = Date.now()/1000;
     mat = Matrix4.mul(mat, Matrix3.rotation.yAxis(secs).toMatrix4());

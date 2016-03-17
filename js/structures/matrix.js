@@ -227,6 +227,56 @@ Matrix4.translation = function(x, y, z){
                        0, 0, 0, 1);
 };
 
+Matrix4.perspective = function(fov, aspect, near, far){
+    var f = 1 / Math.tan(fov / 2);
+    
+    return new Matrix4(f / aspect, 0, 0, 0,
+                       0, f, 0, 0,
+                       0, 0, far / (near - far), 1,
+                       0, 0, -(far * near) / (near - far), 0);
+    
+    
+    
+    
+    
+    /*{ f / Aspect, 0, 0, 0 },
+    { 0, f, 0, 0 },
+    { 0, 0, (Far + Near) / (Near - Far),  (2 * Far * Near) / (Near - Far) }, 
+    { 0, 0, -1, 0 } */
+};
+
+function makePerspective(fovy, aspect, znear, zfar)
+{
+    var ymax = znear * Math.tan(fovy * Math.PI / 360.0);
+    var ymin = -ymax;
+    var xmin = ymin * aspect;
+    var xmax = ymax * aspect;
+
+    return makeFrustum(xmin, xmax, ymin, ymax, znear, zfar);
+}
+
+//
+// glFrustum
+//
+function makeFrustum(left, right,
+                     bottom, top,
+                     znear, zfar)
+{
+    var X = 2*znear/(right-left);
+    var Y = 2*znear/(top-bottom);
+    var A = (right+left)/(right-left);
+    var B = (top+bottom)/(top-bottom);
+    var C = -(zfar+znear)/(zfar-znear);
+    var D = -2*zfar*znear/(zfar-znear);
+
+    return new Matrix4(X, 0, A, 0,
+               0, Y, B, 0,
+               0, 0, C, D,
+               0, 0, -1, 0);
+}
+
+
+
 
 function Matrix3(){
     if (arguments.length === 9){
