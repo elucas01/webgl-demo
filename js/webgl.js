@@ -17,22 +17,32 @@ WebGLUniform.prototype = {
     }
 };
 
-function WebGLAttribute(name, type){
+function WebGLAttribute(name, components, type){
     this.name = name;
-    this.type = type;
     this.value;
+    this.buff;
+    
+    this.components = components;
+    this.type = type;
+    
+    this.position;
 }
 WebGLAttribute.prototype = {
-    setValue: function(value){
-        this.value = value;
+    setValue: function(gl, program, value){
+        this.buff = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buff);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(value), gl.STATIC_DRAW);
+        
+        gl.vertexAttribPointer(this.position, this.components, gl[this.type.toUpperCase()], false, 0, 0);
+        
+        this.position = gl.getAttribLocation(program, this.name);
     },
     
     update: function(gl, program){
-        gl["uniform"+this.type](
-            gl.getUniformLocation(program, this.name), 
-            false, 
-            this.value
-        );
+        //gl.bindBuffer(gl.ARRAY_BUFFER, this.buff);
+        //gl.vertexAttribPointer(this.position, 3, gl[this.type.toUpperCase()], false, 0, 0);
+        //gl.vertexAttribPointer(this.position, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.position);
     }
 };
 
@@ -86,11 +96,17 @@ WebGL.prototype = {
     update: function(){
         this.updateUniforms();
         
+        
+        this.updateAttributes();
+        
         var gl = this.gl;
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
         var coord = gl.getAttribLocation(this.program, "coordinates");
         gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0); 
         gl.enableVertexAttribArray(coord);
-        //this.updateAttributes();
+        
+        
         //this.updateVaryings();
     },
     draw: function(){
@@ -101,6 +117,9 @@ WebGL.prototype = {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
         
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     },
@@ -132,16 +151,16 @@ WebGL.prototype = {
         var gl = this.gl;
         this.vertices = vertices;
         
-        var vertexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        this.vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     },
     setIndices: function(indices){
         var gl = this.gl;
         this.indices = indices;
         
-        var indexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        this.indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
     },
     
@@ -152,7 +171,7 @@ WebGL.prototype = {
     },
     updateAttributes: function(){
         for (var i = 0, l = this.attributes.length; i < l; i++){
-            
+            this.attributes[i].update(this.gl, this.program);
         }  
     },
     updateVaryings: function(){

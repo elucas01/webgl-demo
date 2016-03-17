@@ -9,9 +9,11 @@ vec3.prototype = {
         this.x *= len;
         this.y *= len;
         this.z *= len;
+        
+        return this;
     },
     length: function(){
-        return Math.sqrt(this.x * this.x, this.y * this.y, this.z * this.z);
+        return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
 };
 
@@ -24,6 +26,10 @@ vec3.cross = function(a, b){
 };
 vec3.dot = function(a, b){
     return a.x * b.x + a.y * b.y + a.z * b.z;
+};
+
+vec3.sub = function(a, b){
+    return new vec3(a.x - b.x, a.y - b.y, a.z - b.z);
 };
 
 

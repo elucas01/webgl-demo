@@ -219,6 +219,13 @@ Matrix4.I = Matrix4.identity = new Matrix4(1, 0, 0, 0,
                                            0, 1, 0, 0,
                                            0, 0, 1, 0,
                                            0, 0, 0, 1);
+ 
+Matrix4.translation = function(x, y, z){
+    return new Matrix4(1, 0, 0, x,
+                       0, 1, 0, y,
+                       0, 0, 1, z,
+                       0, 0, 0, 1);
+};
 
 
 function Matrix3(){
@@ -327,6 +334,11 @@ Matrix3.rotation = {
                            sin, cos,  0,
                            0,   0,    1);
     }
+};
+Matrix3.translation = function(x, y){
+    return new Matrix3(1, 0, x,
+                       0, 1, y,
+                       0, 0, 1);
 };
 
 
