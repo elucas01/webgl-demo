@@ -17,6 +17,25 @@ WebGLUniform.prototype = {
     }
 };
 
+function WebGLAttribute(name, type){
+    this.name = name;
+    this.type = type;
+    this.value;
+}
+WebGLAttribute.prototype = {
+    setValue: function(value){
+        this.value = value;
+    },
+    
+    update: function(gl, program){
+        gl["uniform"+this.type](
+            gl.getUniformLocation(program, this.name), 
+            false, 
+            this.value
+        );
+    }
+};
+
 function WebGL(canvas){
     this.canvas = canvas;
     this.gl;
@@ -25,9 +44,14 @@ function WebGL(canvas){
     this.uniforms = [];
     this.attributes = [];
     this.varyings = [];
+    
+    this.vertices;
+    this.indices;
 }
 WebGL.prototype = {
     setup: function(settings){
+        if (settings === undefined) settings={};
+        
         settings = {
             alpha:                          settings.alpha                          || WebGL.alpha,
             depth:                          settings.depth                          || WebGL.depth,
@@ -61,6 +85,11 @@ WebGL.prototype = {
     },
     update: function(){
         this.updateUniforms();
+        
+        var gl = this.gl;
+        var coord = gl.getAttribLocation(this.program, "coordinates");
+        gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0); 
+        gl.enableVertexAttribArray(coord);
         //this.updateAttributes();
         //this.updateVaryings();
     },
@@ -73,7 +102,7 @@ WebGL.prototype = {
         
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         
-        gl.drawElements(gl.TRIANGLES, 6*6, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     },
     
     addShader: function(type, code){
@@ -101,6 +130,7 @@ WebGL.prototype = {
     },
     setVertices: function(vertices){
         var gl = this.gl;
+        this.vertices = vertices;
         
         var vertexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
@@ -108,6 +138,7 @@ WebGL.prototype = {
     },
     setIndices: function(indices){
         var gl = this.gl;
+        this.indices = indices;
         
         var indexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
